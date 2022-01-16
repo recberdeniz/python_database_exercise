@@ -1,0 +1,189 @@
+##########################################################
+# First part of code
+##########################################################
+import sqlite3
+import time
+# This code module is written by @recberdeniz to exercise about database application for Python Programming
+# Library class: This class includes database queries for operations;
+# I added 9 different operations for this library database, explaining of the operations and functions for this module;
+# Firstly, this class includes connection and disconnection functions for database
+# If there is no database named as Library.db, make_connection function will create this database
+# If library has books, show_books function shows all saved books information.
+# Otherwise, this function dedicate that "Library is empty"
+# With book_query function, it is possible to make a query accordingly book name
+# add_book function can insert new book information to Library.db
+# delete_book function can delete a book from Library.db accordingly book name
+# upgrade_edition function can upgrade the edition of book which is entered by user
+# update_publisher function is written to update the publisher of book which is entered by user
+# user also can query accordingly author, genre and language with author_query, genre_query and language_query functions
+# clear_library function clears completely the library and remove all of book information
+
+# Book class: This class includes book information and book information printing
+class Book():
+
+    def __init__(self, name, author, publisher, genre, edition, page_num, language):
+        self.name = name
+        self.author = author
+        self.publisher = publisher
+        self.genre = genre
+        self.edition = edition
+        self.page_num = page_num
+        self.language = language
+
+    def __str__(self):
+        return "Book name: {}\nAuthor: {}\nPublisher: {}\nType: {}\nEdition: {}\nPage: {}\nLanguage: {}" \
+            .format(self.name, self.author, self.publisher, self.genre, self.edition, self.page_num, self.language)
+# End of Book class
+
+# Library class: All information about this class explained in first rows as a comment
+# Briefly, all of library query operations have written from there to end of module
+class Library():
+
+    def __init__(self):
+
+        self.make_connection()
+
+    def make_connection(self):
+
+        self.connection = sqlite3.connect("Library.db")
+        self.cursor = self.connection.cursor()
+
+        query = "Create Table If not Exists Books (name TEXT, author TEXT, publisher TEXT, genre TEXT, edition INT, " \
+                "page INT, language TEXT) "
+        self.cursor.execute(query)
+        self.connection.commit()
+
+    def disconnect(self):
+
+        self.connection.close()
+
+    def show_books(self):
+
+        query = "Select * From Books"
+        self.cursor.execute(query)
+
+        Books = self.cursor.fetchall()
+
+        if len(Books) == 0:
+            print("Library is empty...")
+
+        else:
+            for i in Books:
+                book = Book(i[0], i[1], i[2], i[3], i[4], i[5], i[6])
+                print(book)
+
+    def book_query(self, name):
+
+        query = "Select * From Books where name = ?"
+
+        self.cursor.execute(query, (name,))
+        Books = self.cursor.fetchall()
+
+        if len(Books) == 0:
+            print("There is no matching with your query...")
+
+        else:
+            book = Book(Books[0][0], Books[0][1], Books[0][2], Books[0][3], Books[0][4], Books[0][5], Books[0][6])
+            print(book)
+
+    def add_book(self, book):
+
+        query = "Insert into Books Values (?,?,?,?,?,?,?)"
+        self.cursor.execute(query, (book.name, book.author, book.publisher, book.genre, book.edition, book.page_num, book.language))
+        self.connection.commit()
+
+    def delete_book(self, name):
+
+        query = "Delete From Books where name =?"
+        query2 = "Select * From Books where name=?"
+        self.cursor.execute(query2, (name,))
+        Books = self.cursor.fetchall()
+        if len(Books) != 0:
+            self.cursor.execute(query, (name,))
+            self.connection.commit()
+            print("Book is deleted")
+        else:
+            print("The books which you would like to delete is not added")
+
+    def upgrade_edition(self, name):
+
+        query = "Select * From Books where name =?"
+        self.cursor.execute(query, (name,))
+
+        Books = self.cursor.fetchall()
+
+        if len(Books) == 0:
+            print("The book is not found to upgrade, please check the library...")
+
+        else:
+            edition = Books[0][4]
+            edition += 1
+
+            query2 = "Update Books set edition = ? where name = ?"
+            self.cursor.execute(query2, (edition, name))
+            self.connection.commit()
+            print("Edition is Upgraded")
+
+    def update_publisher(self, name, newname):
+
+        query = "Select * From Books where name =?"
+        self.cursor.execute(query, (name,))
+
+        Books = self.cursor.fetchall()
+
+        if len(Books) == 0:
+            print("The book is not found to update, please check the library...")
+
+        else:
+            publisher = Books[0][2]
+
+            query2 = "Update Books set Publisher = ? where Publisher = ?"
+            self.cursor.execute(query2, (newname, publisher))
+            self.connection.commit()
+            print("Update is finished.")
+
+    def author_query(self, name):
+
+        query = "Select * From Books where author = ?"
+        self.cursor.execute(query, (name,))
+        Books = self.cursor.fetchall()
+        if len(Books) == 0:
+            print("There is no matching with inserted author name...")
+
+        else:
+            book = Book(Books[0][0], Books[0][1], Books[0][2], Books[0][3], Books[0][4], Books[0][5], Books[0][6])
+            print(book)
+
+    def genre_query(self, genre):
+
+        query = "Select * From Books where type = ?"
+        self.cursor.execute(query, (genre,))
+        Books = self.cursor.fetchall()
+
+        if len(Books) == 0:
+            print("There is no matching with inserted type name...")
+
+        else:
+            for i in Books:
+                book = Book(i[0], i[1], i[2], i[3], i[4], i[5], i[6])
+                print(book)
+
+    def clear_lib(self):
+
+        query = "Delete From Books"
+        self.cursor.execute(query)
+        self.connection.commit()
+        print("Library is cleared.")
+
+    def language_query(self, name):
+
+        query = "Select * From Books where language = ?"
+        self.cursor.execute(query, (name,))
+        Books = self.cursor.fetchall()
+        if len(Books) == 0:
+            print("There is no matching with inserted language...")
+
+        else:
+            book = Book(Books[0][0], Books[0][1], Books[0][2], Books[0][3], Books[0][4], Books[0][5], Books[0][6])
+            print(book)
+
