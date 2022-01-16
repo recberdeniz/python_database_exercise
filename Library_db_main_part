@@ -1,0 +1,120 @@
+# This part is also written to exercise about database application for Python Programming
+# This part is the main code part of the Library database application
+# First part is written as a module of Library.db
+# Before using these two code parts, check folder directory and mark directory as source roots to use first part as
+# a source module
+# To mark directory as source roots; right click to the file directory where the two code parts
+# and then choose mark directory as source roots in PyCharm compiler
+
+from Lec11_q1 import *
+
+print("""
+************************************
+Welcome to Library Database Program
+
+Operations:
+1) Show book lists
+2) Book query
+3) Add new book
+4) Delete a book
+5) Upgrade edition
+6) Update publisher
+7) Writer query
+8) Type query
+9) Language query
+10) Clear all library
+
+To exit the program please press 'q'
+************************************
+""")
+
+library = Library()
+while True:
+    operation = input("Please choose an operation:")
+
+    if operation == 'q':
+        print("Program is shutting down...")
+        time.sleep(1)
+        break
+
+    elif operation == '1':
+        library.show_books()
+
+    elif operation == '2':
+        name = input("Please insert name of book which you would like to:")
+        print("Book is queried...")
+        time.sleep(1)
+        library.book_query(name)
+
+    elif operation == '3':
+        print("Please insert book informations which you would like to add into library:")
+        name = input("Book name:")
+        author = input("Author:")
+        publisher = input("Publisher:")
+        genre = input("Genre:")
+        edition = int(input("Edition:"))
+        page_num = int(input("Page:"))
+        language = input("Language:")
+        new_book = Book(name, author, publisher, genre, edition, page_num, language)
+        print("Book is adding...")
+        time.sleep(1)
+        library.add_book(new_book)
+        print("Book added")
+
+    elif operation == '4':
+        print("Please insert a name of book which would you like to delete")
+        name = input("Insert a name of book:")
+        response = input("Are you sure? (Y/N)")
+
+        if response == 'Y':
+            print("Book is deleting")
+            time.sleep(1)
+            library.delete_book(name)
+
+
+    elif operation == '5':
+        print("Please insert a name of book which would you like to upgrade its edition")
+        name = input("Insert a name of book")
+        print("Edition is upgrading")
+        time.sleep(1)
+        library.upgrade_edition(name)
+
+    elif operation == '6':
+
+        print("Please insert a name of book which would like to update its publisher")
+        name = input("Insert a name of book:")
+        newname = input("Insert a new publisher:")
+        print("Publisher information is updating")
+        time.sleep(1)
+        library.update_publisher(name, newname)
+
+    elif operation == '7':
+        name = input("Please insert name of author which you would like to:")
+        print("Writer is queried...")
+        time.sleep(1)
+        library.author_query(name)
+
+    elif operation == '8':
+        genre = input("Please insert name of type which you would like to:")
+        print("Type is queried...")
+        time.sleep(1)
+        library.type_query(genre)
+
+    elif operation == '9':
+
+        language = input("Please insert language that you would like to:")
+        print("Language is queried...")
+        time.sleep(1)
+        library.language_query(language)
+
+    elif operation == '10':
+
+        print("Library clear process is starting...")
+        response = input("Are you sure to clear all library documents? (Y/N)")
+        if response == 'Y':
+            print("Library is cleaning...")
+            time.sleep(3)
+            library.clear_lib()
+
+    else:
+        print("Invalid operation...")
