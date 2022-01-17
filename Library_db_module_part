@@ -1,6 +1,3 @@
-##########################################################
-# First part of code
-##########################################################
 import sqlite3
 import time
 # This code module is written by @recberdeniz to exercise about database application for Python Programming
@@ -150,8 +147,9 @@ class Library():
         if len(Books) == 0:
             print("There is no matching with inserted author name...")
 
-        else:
-            book = Book(Books[0][0], Books[0][1], Books[0][2], Books[0][3], Books[0][4], Books[0][5], Books[0][6])
+        for i in Books:
+            book = Book(i[0], i[1], i[2], i[3], i[4], i[5], i[6])
+
             print(book)
 
     def genre_query(self, genre):
@@ -184,6 +182,6 @@ class Library():
             print("There is no matching with inserted language...")
 
         else:
-            book = Book(Books[0][0], Books[0][1], Books[0][2], Books[0][3], Books[0][4], Books[0][5], Books[0][6])
-            print(book)
-
+            for i in Books:
+                book = Book(i[0], i[1], i[2], i[3], i[4], i[5], i[6])
+                print(book)
