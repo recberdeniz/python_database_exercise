@@ -19,7 +19,7 @@ Operations:
 4) Delete a book
 5) Upgrade edition
 6) Update publisher
-7) Writer query
+7) Author query
 8) Type query
 9) Language query
 10) Clear all library
@@ -90,7 +90,7 @@ while True:
 
     elif operation == '7':
         name = input("Please insert name of author which you would like to:")
-        print("Writer is queried...")
+        print("Author is queried...")
         time.sleep(1)
         library.author_query(name)
 
