@@ -1,0 +1,147 @@
+# Super market main part is divided two parts that one of them is customer section and one of them is staff section
+# When user choose '1', it means that login as a customer/client
+# User can choose 6 different operation that;
+# 1) Show all categories
+# 2) Search item accordingly with the name
+# 3) Item add to chart accordingly with the name
+# 4) Delete item from chart
+# 5) Show the chart
+# 6) Evaluate the total price of chart
+# If user wants to login as a staff/personal, needs to insert personal ID
+# After login as a staff/personal again can choose 6 different operation that;
+# 1) Show all categories
+# 2) Search item accordingly with the name
+# 3) Delete item from products table
+# 4) Update stock of item
+# 5) Update price of item
+# 6) Add a new item to products table
+
+from module_supermarket import *
+
+print("""
+******************************
+Welcome to Supermarket Program
+******************************
+""")
+answer = input("Press '1' to login as a client Or please enter your Personal ID to login as a staff:")
+category = Categories()
+
+if answer == '1':
+    print("""
+    ***************************************************
+    Operation 1: Show all categories
+    Operation 2: Search any item on the categories
+    Operation 3: Select item to add your chart
+    Operation 4: Select item to delete from your chart
+    Operation 5: Show your shopping chart
+    Operation 6: Evaluate your chart total price
+    To exit the program press 'q' button
+    *************************************************** 
+    """)
+
+    while True:
+        operation = input("Choose operation:")
+
+        if operation == 'q':
+            print("Supermarket program is shutting down")
+            category.deleteallchart()
+            time.sleep(2)
+            break
+
+        elif operation == '1':
+            category.show_categories()
+
+        elif operation == '2':
+            name = input(print("Insert name of item that you looking for:"))
+            print("Item is quering...")
+            time.sleep(2)
+            category.show_nameof_category(name)
+
+        elif operation == '3':
+            name = input(print("Insert name of item that you would like to add your chart:"))
+            age = int(input(print("Insert your age:")))
+            print("Item is adding...")
+            time.sleep(2)
+            category.add_item2chart(name, age)
+
+        elif operation == '4':
+            name = input(print("Insert name of item that you would like to delete from your chart:"))
+            print("Item is deleting...")
+            time.sleep(2)
+            category.delete_item2chart(name)
+
+        elif operation == '5':
+            category.show_chart()
+
+        elif operation == '6':
+            category.evaluate_price2chart()
+
+
+elif answer =='0000':
+    print("""
+    ************************************************
+    Operation 1: Show all categories
+    Operation 2: Search any item on the categories
+    Operation 3: Delete item from categories
+    Operation 4: Update stock that selected item
+    Operation 5: Update price that selected item
+    Operation 6: Add new item to categories
+    ************************************************
+    """)
+    while True:
+        operation = input("Select operation:")
+        if operation == 'q':
+            print("Supermarket program is shutting down...")
+            time.sleep(2)
+            break
+
+        elif operation == '1':
+            category.show_categories()
+
+        elif operation == '2':
+            name = input(print("Insert name of item that you are looking:"))
+            print("Item is quering...")
+            time.sleep(2)
+            category.show_nameof_category(name)
+
+        elif operation == '3':
+            name = input(print("Insert name of item that you would like to delete:"))
+            print("Item is deleting...")
+            time.sleep(2)
+            category.delete_item2products(name)
+
+        elif operation == '4':
+            name = input(print("Insert name of item that you would like to update stock:"))
+            new_stock = input(print("Insert a new stock amount:"))
+            print("Item stock is updating...")
+            time.sleep(2)
+            category.update_stock(name, new_stock)
+
+        elif operation == '5':
+            name = input(print("Insert name of item that you would like to update price:"))
+            new_price = input(print("Insert a new price of item:"))
+            print("Price is updating for selected item...")
+            time.sleep(2)
+            category.update_price(name, new_price)
+
+        elif operation == '6':
+            print("Please insert product informations:")
+            i_category = input("Please insert a category of item:")
+            i_name = input("Please insert a name of item:")
+            i_brand = input("Please insert a brand of item:")
+            i_price = input("Please insert a price of item:")
+            i_amount = input("Please insert an amount of item:")
+            i_unit = input("Please insert a unit of item:")
+            i_stock = input("Please insert a stock of item:")
+            new_product = product_info(i_category, i_name, i_brand, i_price, i_amount, i_unit, i_stock)
+            print("Product is adding into the table...")
+            time.sleep(2)
+            category.add_item2product(new_product)
+            print("Process is successful! Product is added.")
+
+
+        else:
+            print("Invalid operation...")
+
+else:
+    print("Invalid key code...")
