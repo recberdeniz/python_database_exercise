@@ -1,0 +1,359 @@
+import sqlite3
+import time
+# This code module is written by @recberdeniz to exercise about database application for Python Programming
+# Supermarket module has one class that categories and it has different queries for both customers and staff
+# It includes 2 different table that one of them is products and one of them is chart table
+# Both customers and staff can show categories from products table
+# Both customers and staff can search product info accordingly with name
+# Customers can check out their chart table
+# Customers can add a new item/product to their chart table
+# Customers can delete item/product from their chart table accordingly with name
+# Staff can delete item/product from products table accordingly with name
+# Customers can evaluate the total price of their chart
+# Staff can update the stock of the item separately accordingly with name
+# Staff can update the price of the item separately accordingly with name
+# Staff can add a new item to the product table
+# Lastly, deleteallchart part can clear the chart table each program closing time
+
+class product_info():
+
+    def __init__(self, category, name, brand, price, amount, unit, stock):
+        self.category = category
+        self.brand = brand
+        self.name = name
+        self.price = price
+        self.amount = amount
+        self.unit = unit
+        self.stock = stock
+
+    def __str__(self):
+        return "Category: {}\nName: {}\nBrand: {}\nPrice: {}\nAmount: {}\nUnit: {}\nStock: {}" \
+            .format(self.category, self.name, self.brand, self.price, self.amount, self.unit, self.stock)
+
+
+class chart_info():
+
+    def __init__(self, category, name, brand, price, amount, unit, stock):
+        self.category = category
+        self.brand = brand
+        self.name = name
+        self.price = price
+        self.amount = amount
+        self.unit = unit
+        self.stock = stock
+
+    def __str__(self):
+        return "Category: {}\nName: {}\nBrand: {}\nPrice: {}\nAmount: {}\nUnit: {}\nStock: {}" \
+            .format(self.category, self.name, self.brand, self.price, self.amount, self.unit, self.stock)
+
+
+class Categories():
+
+    def __init__(self):
+
+        self.makeaconnection()
+
+    def makeaconnection(self):
+        self.connection = sqlite3.connect("super_market.db")
+        self.cursor = self.connection.cursor()
+        query = "Create Table If not exists Products (category TEXT, name TEXT, brand TEXT, price TEXT, amount INT," \
+                " unit TEXT, stock INT)"
+
+        self.cursor.execute(query)
+        self.connection.commit()
+
+        query2chart = "Create Table If not exists Chart (category TEXT, name TEXT, brand TEXT, price TEXT, amount INT," \
+                      "unit TEXT, stock INT)"
+
+        self.cursor.execute(query2chart)
+        self.connection.commit()
+
+    def disconnection(self):
+        self.connection.close()
+
+# this part is showing the all categories and products for both costumer and staff
+    def show_categories(self):
+
+        query = "Select *From Products"
+        self.cursor.execute(query)
+        Products = self.cursor.fetchall()
+
+        if len(Products) == 0:
+            print("Supermarket stock is empty...")
+
+        else:
+            for i in Products:
+                categories = product_info(i[0], i[1], i[2], i[3], i[4], i[5], i[6])
+                print(categories)
+
+# this part is showing the information about product accordingly searching with name
+    def show_nameof_category(self, name):
+
+        query = "Select From Products where name =?"
+        self.cursor.execute(query, (name,))
+        Products = self.cursor.fetchall()
+
+        if len(Products) == 0:
+            print("The product that you are looking is not in the product list...")
+
+        else:
+            product = product_info(Products[0][0], Products[0][1], Products[0][2], Products[0][3], Products[0][5],
+                                   Products[0][4], Products[0][6])
+            print(product)
+
+# this part is showing a chart for customer
+    def show_chart(self):
+
+        query = "Select *From Chart"
+        self.cursor.execute(query)
+        Chart = self.cursor.fetchall()
+        if len(Chart) == 0:
+            print("Your shopping chart is empty...")
+
+        else:
+            for i in Chart:
+                shopchart = chart_info(i[0], i[1], i[2], i[3], i[4], i[5], i[6])
+                print(shopchart)
+
+    def add_item2chart(self, name, age):
+        query = "Select *From Products where name =?"
+        self.cursor.execute(query, (name,))
+        Products = self.cursor.fetchall()
+        query2check = "Select *From Chart"
+        self.cursor.execute(query2check)
+        Chart = self.cursor.fetchall()
+
+        if len(Products) == 0:
+            print("Selected product is not in the product list...")
+
+        else:
+            item = product_info(Products[0][0], Products[0][1], Products[0][2], Products[0][3], Products[0][4], \
+                                Products[0][5], Products[0][6])
+            if item.stock != 0:
+                # For alcohol and medicine purchase control
+                if item.category == 'Alcohol' or item.category == 'Medicine':
+                    # Age control for medicine and alcohol
+                    if age < 18:
+                        print("You connot get alcohol or medicine due to age limit.")
+
+                    elif age < 21:
+                        print("You cannot get alcohol due to age limit.")
+                    # End of age control for medicine and alcohol
+
+                    else:
+                        # When customer pass the age control, we check the chart is empty or not
+                        # If chart is not emty, we need to control that chart item equal to product item
+                        if len(Chart) != 0:
+
+                            chart_item = chart_info(Chart[0][0], Chart[0][1], Chart[0][2], Chart[0][3], Chart[0][4],
+                                                    Chart[0][5], Chart[0][6])
+
+                            # If chart item is equal to product item, we should update the chart stock and product stock
+                            if chart_item.name == item.name:
+
+                                stock_chartnup = chart_item.stock
+                                updated_chart = chart_item.stock + 1
+                                queryupdate2chart = "Update Chart set stock = ? where stock = ?"
+                                self.cursor.execute(queryupdate2chart, (updated_chart, stock_chartnup))
+                                self.connection.commit()
+                                query2data = "Select *From Products where name = ?"
+                                self.cursor.execute(query2data, (name,))
+                                self.cursor.fetchall()
+                                stock2update = Products[0][6]
+                                stock_updated = stock2update - 1
+                                query2update = "Update Products set stock = ? where stock = ?"
+                                self.cursor.execute(query2update, (stock_updated, stock2update))
+                                self.connection.commit()
+                                print("Process successful! Item is added.")
+                            # Vice versa, we can insert the new alcohol or medicine to chart table
+                            # and update the product table
+                            else:
+                                updated_stock = Products[0][6]
+                                stock2chart = updated_stock - (updated_stock - 1)
+                                query = "Insert Into Chart Values (?, ?, ?, ?, ?, ?, ?)"
+                                self.cursor.execute(query, (item.category, item.name, item.brand, item.price,
+                                                            item.amount, item.unit, stock2chart))
+                                self.connection.commit()
+                                query2data = "Select *From Products where name = ?"
+                                self.cursor.execute(query2data, (name,))
+                                self.cursor.fetchall()
+                                stock2update = Products[0][6]
+                                stock2update -= 1
+                                query2update = "Update Products set stock = ? where stock = ?"
+                                self.cursor.execute(query2update, (stock2update, updated_stock))
+                                self.connection.commit()
+                                print("Process successful! Item is added.")
+                                # end of insert and update process
+
+                        # If chart table is empty, we just insert item information to the chart table
+                        # and we can update the product stock from product table
+                        else:
+                            updated_stock = Products[0][6]
+                            stock2chart = updated_stock - (updated_stock - 1)
+                            query = "Insert Into Chart Values (?, ?, ?, ?, ?, ?, ?)"
+                            self.cursor.execute(query, (item.category, item.name, item.brand, item.price, item.amount,
+                                                        item.unit, stock2chart))
+                            self.connection.commit()
+                            query2data = "Select *From Products where name = ?"
+                            self.cursor.execute(query2data, (name,))
+                            self.cursor.fetchall()
+                            stock2update = Products[0][6]
+                            stock2update -= 1
+                            query2update = "Update Products set stock = ? where stock = ?"
+                            self.cursor.execute(query2update, (stock2update, updated_stock))
+                            self.connection.commit()
+                            print("Process successful! Item is added.")
+
+                else:
+                    # We repeat the same process again for other categories
+                    if len(Chart) != 0:
+                        chart_item = chart_info(Chart[0][0], Chart[0][1], Chart[0][2], Chart[0][3], Chart[0][4],
+                                                Chart[0][5], Chart[0][6])
+                        if chart_item.name == item.name:
+                            stock_chartnup = chart_item.stock
+                            updated_chart = chart_item.stock + 1
+                            queryupdate2chart = "Update Chart set stock = ? where stock = ?"
+                            self.cursor.execute(queryupdate2chart, (updated_chart, stock_chartnup))
+                            self.connection.commit()
+                            query2data = "Select *From Products where name = ?"
+                            self.cursor.execute(query2data, (name,))
+                            self.cursor.fetchall()
+                            stock2update = Products[0][6]
+                            stock_updated = stock2update - 1
+                            query2update = "Update Products set stock = ? where stock = ?"
+                            self.cursor.execute(query2update, (stock_updated, stock2update))
+                            self.connection.commit()
+                            print("Process successful! Item is added.")
+
+                    else:
+                        stock2update = Products[0][6]
+                        stock2chart = stock2update - (stock2update - 1)
+                        query = "Insert Into Chart Values (?, ?, ?, ?, ?, ?, ?)"
+                        self.cursor.execute(query, (item.category, item.name, item.brand, item.price,
+                                                    item.amount, item.unit, stock2chart))
+                        self.connection.commit()
+                        query2data = "Select *From Products where name = ?"
+                        self.cursor.execute(query2data, (name,))
+                        self.cursor.fetchall()
+                        updated_stock = stock2update - 1
+                        query2update = "Update Products set stock = ? where stock = ?"
+                        self.cursor.execute(query2update, (updated_stock, stock2update))
+                        self.connection.commit()
+                        print("Process successful! Item is added.")
+
+            else:
+                print("The item that you would like to add is out of stock...")
+                # end of item adding to chart section
+
+    # delete item from chart part
+    # In here, we select the name that for delete option from the chart
+    def delete_item2chart(self, name):
+
+        query = "Delete From Chart where name =?" # query to item that would delete
+        query2check = "Select *From Chart where name =?" # query to check item from chart table
+        self.cursor.execute(query2check, (name,))
+        Deleted_item = self.cursor.fetchall()
+        # If the deleted_item is in the chart, we can delete item and update products table that selected item's stock
+        if len(Deleted_item) != 0:
+            stock_chart = Deleted_item[0][6]
+            self.cursor.execute(query, (name,))
+            self.connection.commit()
+            print("Product deleted from your chart.")
+            query2select = "Select *From Products where name =?"
+            self.cursor.execute(query2select, (name,))
+            Products = self.cursor.fetchall()
+            stock2update = Products[0][6]
+            updated_stock = stock2update + stock_chart
+            query2update = "Update Products set stock =? where stock =?"
+            self.cursor.execute(query2update, (updated_stock, stock2update))
+        # If item name is not match with the items in the chart
+        # We should show that the item is not in the chart
+        else:
+            print("Selected product is not in your chart...")
+    # This part for the deleting item from products table
+    # If the selected item in the products, we also can delete item from the product table
+    def delete_item2products(self, name):
+
+        query = "Delete From Products where name=?"
+        querycheck = "Select *From Products where name =?"
+        self.cursor.execute(querycheck, (name,))
+        Deleted_item = self.cursor.fetchall()
+
+        if len(Deleted_item) != 0:
+            self.cursor.execute(query, (name,))
+            self.connection.commit()
+            print("Product deleted from Products list.")
+
+        else:
+            print("Selected product is not in the product list")
+
+    # this part is for the evaluating price of chart for customer
+
+    def evaluate_price2chart(self):
+
+        query = "Select *From Chart"
+        self.cursor.execute(query)
+        chart = self.cursor.fetchall()
+
+        if len(chart) == 0:
+            print("Your shopping chart is empty...")
+            print("Total price: 0.00")
+
+        else:
+            total_price = 0
+            price = 0
+            for i in chart:
+                price = i[3]
+                stock = i[6]
+                splitted_price = price.split('.')
+                reserve_price = float(int(splitted_price[1]) * int(stock)/100)
+                floor_price = int(splitted_price[0])*int(stock)
+                total_price += floor_price + reserve_price
+            print("Total price of your shopping chart: {} $".format(total_price))
+
+    # this part can update the stock accordingly name of product for the staff
+    def update_stock(self, name, new_stock):
+
+        query = "Select * From Products where name = ?"
+        self.cursor.execute(query, (name,))
+        Products = self.cursor.fetchall()
+
+        if len(Products) != 0:
+            query2update = "Update Products set stock = ? where name = ?"
+            self.cursor.execute(query2update, (new_stock, name))
+            self.connection.commit()
+            print("Update successful.")
+
+        else:
+            print("The product which is entered for update is not in the product list")
+            print("Please check product list again...")
+
+    #this part can update the price of product for the staff
+    def update_price(self, name, new_price):
+        query = "Select *From Products where name =?"
+        self.cursor.execute(query, (name,))
+        selecteditem = self.cursor.fetchall()
+
+        if len(selecteditem) != 0:
+            #price = selecteditem[0][3]
+            query2update = "Update Products set price = ? where name = ?"
+            self.cursor.execute(query2update, (new_price, name))
+            self.connection.commit()
+            print("Update successful.")
+
+        else:
+            print("The product which is entered for update is not in the product list")
+            print("Please check product list again...")
+
+    # this part can add a new item to the products table for staff
+    def add_item2product(self, new_product):
+        query = "Insert Into Products values (?, ?, ?, ?, ?, ?, ?)"
+        self.cursor.execute(query, (new_product.category, new_product.name, new_product.brand, new_product.price,
+                                    new_product.amount, new_product.unit, new_product.stock))
+        self.connection.commit()
+
+    # this part for deleting all chart and works after the super market program shut down to clear for new customer
+    def deleteallchart(self):
+        query = "Delete From Chart"
+        self.cursor.execute(query)
+        self.connection.commit()
